@@ -1,8 +1,50 @@
 #!/bin/sh
 
+help="usage: $0 [-v] source_directory target_directory"
+v=
+
+function error_exit
+{
+  echo "$1" 1>&2
+  exit 1
+}
+
+while getopts ":vh" opt; do
+  case $opt in
+    v)
+      v="-v"
+      ;;
+    h)
+      echo "Copies all subdirectories from source directory to target one without overwriting"
+      echo $help
+      echo " -v: verbose output"
+      echo " -h: help"
+      exit
+      ;;  
+    \?)
+      echo "$0: illegal option: -- $OPTARG"
+      echo $help
+      exit
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
 if [ -z "$1" -o -z "$2" ]; then
-    echo "Usage: $0 source_dir dest_dir"
-    exit
+  echo $help
+  exit
 fi
 
-cp -nrv $1/* $2
+if [ ! -d "$1" ]; then
+  error_exit "$1: Not a directory"
+fi
+
+if [ ! -d "$2" ]; then
+  error_exit "$2: Not a directory"
+fi
+
+if [ $v ]; then
+  echo "Copying contents of $1 into $2"
+fi
+
+cp -nr $v  $1/* $2
