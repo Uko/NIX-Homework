@@ -9,18 +9,22 @@ error_exit()
   exit 1
 }
 
+# process flafs
 while getopts ":vh" opt; do
   case $opt in
+    # enable verbose output
     v)
       v="-v"
       ;;
+    # print out some help data
     h)
       echo "Copies all subdirectories from source directory to target one without overwriting"
       echo $help
       echo " -v: verbose output"
       echo " -h: help"
       exit
-      ;;  
+      ;;
+    # tell about illegal flag
     \?)
       echo "$0: illegal option: -- $OPTARG"
       echo $help
@@ -28,17 +32,21 @@ while getopts ":vh" opt; do
       ;;
   esac
 done
+# remove last flag (others are removed during a loop)
 shift $((OPTIND-1))
 
+# check if the both directories are specified
 if [ -z $1 ] || [ -z $2 ]; then
   echo $help
   exit
 fi
 
+# check if the first parameted is a directory
 if [ ! -d $1 ]; then
   error_exit "$1: Not a directory"
 fi
 
+# check if the second parameter is a directory
 if [ ! -d $2 ]; then
   error_exit "$2: Not a directory"
 fi
@@ -47,12 +55,14 @@ if [ $v ]; then
   echo "Copying contents of $1 into $2"
 fi
 
-#cp -nr $v  $1/* $2
+# loop through the contents of the source directory
 for directory in `ls $1`; do
+  # if the current content is a directory and it's not present in a target directory
   if [ -d $1/$directory ] && [ ! -d $2/$directory ]; then
     if [ $v ]; then
       echo "|$directory:"
     fi
+    # then coppy all that subdirectory with all it's data recursively
     cp -r $v $1/$directory $2/ 
   fi
 done
