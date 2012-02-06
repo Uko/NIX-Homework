@@ -30,16 +30,16 @@ while getopts ":vh" opt; do
 done
 shift $((OPTIND-1))
 
-if [ -z "$1" ] || [ -z "$2" ]; then
+if [ -z $1 ] || [ -z $2 ]; then
   echo $help
   exit
 fi
 
-if [ ! -d "$1" ]; then
+if [ ! -d $1 ]; then
   error_exit "$1: Not a directory"
 fi
 
-if [ ! -d "$2" ]; then
+if [ ! -d $2 ]; then
   error_exit "$2: Not a directory"
 fi
 
@@ -48,9 +48,11 @@ if [ $v ]; then
 fi
 
 #cp -nr $v  $1/* $2
-for directory in $1/*
-do
-  if [ -d "$directory" ] && [ ! -d "$2/$directory" ]; then
-    cp -r $v $directory $2/ 
+for directory in `ls $1`; do
+  if [ -d $1/$directory ] && [ ! -d $2/$directory ]; then
+    if [ $v ]; then
+      echo "|$directory:"
+    fi
+    cp -r $v $1/$directory $2/ 
   fi
 done
