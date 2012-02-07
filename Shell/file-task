@@ -9,7 +9,7 @@ error_exit()
   exit 1
 }
 
-# process flafs
+# process flags
 while getopts ":vh" opt; do
   case $opt in
     # enable verbose output
