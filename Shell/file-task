@@ -1,7 +1,6 @@
 #!/bin/sh
 
 help="usage: $0 [-v] source_directory target_directory"
-v=
 
 error_exit()
 {
