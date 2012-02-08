@@ -1,0 +1,57 @@
+#! /bin/csh
+
+set help="usage: $0 [-v] source_directory target_directory"
+
+# process flags
+set argv=`getopt :vh $*`
+while ($#argv>0)
+  switch($argv[1])
+    case -v:
+      set v="-v"
+      shift
+      breaksw
+    case -h:
+      echo "Copies all subdirectories from source directory to target one without overwriting"
+      echo "$help"
+      echo " -v: verbose output"
+      echo " -h: help"
+      exit
+    case --:
+      shift
+      break
+  endsw
+end
+
+# check if the both directories are specified
+if ($#argv<2) then
+  echo "$help"
+  exit
+endif
+
+# check if the first parameted is a directory
+if (! -d $argv[1]) then
+  echo "$argv[1] : Not a directory"
+  exit 1
+endif
+
+# check if the second parameter is a directory
+if (! -d $argv[2]) then
+  echo "$argv[2] : Not a directory"
+  exit 1
+endif
+
+if ($?v) then
+  echo "Copying contents of $argv[1] into $argv[2]"
+endif
+
+# loop through the contents of the source directory
+foreach directory (`ls $argv[1]`)
+  # if the current content is a directory and it's not present in a target directory
+  if ((-d $argv[1]/$directory) && (! -d $argv[2]/$directory)) then
+    if ($?v) then
+      echo "|$directory :"
+    endif
+    # then coppy all that subdirectory with all it's data recursively
+    cp -r $v $argv[1]/$directory $argv[2]/ 
+  endif
+end
