@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 struct globalArgs_t
 {
@@ -20,6 +21,31 @@ void help()
   puts(" -v: verbose output");
   puts(" -h: help");
   exit(EXIT_FAILURE);
+}
+
+int cpSubdirs(char *src, char *dst)
+{
+  DIR *srcDir;
+  DIR *dstDir;
+  struct dirent* dirEntry;
+  
+  srcDir = opendir(src);
+  dstDir = opendir(dst);
+  if(srcDir == NULL)
+  {
+    printf("Cannot open directory: '%s'\n", src);
+    exit(EXIT_FAILURE);
+  }
+  if(dstDir == NULL)
+  {
+    printf("Cannot open directory: '%s'\n", dst);
+    exit(EXIT_FAILURE);
+  }
+
+
+  
+
+  return 0;
 }
 
 int main(int argc, char *argv[])
@@ -50,9 +76,14 @@ int main(int argc, char *argv[])
 
   globalArgs.directories = argv + optind;
   globalArgs.numOfDirs = argc - optind;
-
+  
+  if(globalArgs.numOfDirs<2)
+  {
+    puts(usage);
+    exit(EXIT_FAILURE);
+  }
   
 
-  printf("Hello world\n");
+  printf("args left %i\n",globalArgs.numOfDirs);
   return 0;
 }
