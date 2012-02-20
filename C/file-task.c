@@ -6,7 +6,7 @@
 
 struct globalArgs_t
 {
-  int verbosity;       // -v option
+  int verbose;       // -v option
   int force;           // -f option
   char **directories;  // directories parameters
   int numOfDirs;       // # of directories specified
@@ -45,7 +45,7 @@ int copyFile(char *src, char *dst)
         dstFile = fopen(dst,"w");
 	if(dstFile)
 	{
-	  if(globalArgs.verbosity) printf("%s -> %s\n",src,dst);
+	  if(globalArgs.verbose) printf("%s -> %s\n",src,dst);
 	  while((buffer=getc(srcFile))!=EOF)
 	  {
 	    putc(buffer,dstFile);
@@ -69,37 +69,50 @@ int copyFile(char *src, char *dst)
 
 int recursiveCopy(char *from, char *where, char *what, int file)
 {
+  int fail = 0;
   char * thisPath = malloc(snprintf(NULL, 0, "%s/%s", from, what) + 1);
   sprintf(thisPath, "%s/%s", from, what);
   char * newPath = malloc(snprintf(NULL, 0, "%s/%s", where, what) + 1);
   sprintf(newPath, "%s/%s", where, what);
   if(file)
   {
-    copyFile(thisPath,newPath);
+      fail = copyFile(thisPath,newPath)&&!globalArgs.force;
   }
   else
   {
-    if(mkdir(newPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
+    if(fail=mkdir(newPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
     {
-      printf("Failed to copy directory: %s\n",newPath);
-      return 1;
+      printf("Cannot copy directory: %s\n",thisPath);
+      fail=!globalArgs.force;
     }
-    DIR *thisDir;
-    struct dirent* dirEntry;
-    if(thisDir = opendir(thisPath))
+    else
     {
-      while(dirEntry = readdir(thisDir))
+      if (globalArgs.verbose) printf("%s/ -> %s/\n",thisPath, newPath);
+      DIR *thisDir;
+      struct dirent* dirEntry;
+      if(thisDir = opendir(thisPath))
       {
-	if( strcmp(dirEntry->d_name, ".") != 0 &&
-	    strcmp(dirEntry->d_name, "..") != 0 )
+	while(!fail&&(dirEntry = readdir(thisDir)))
 	{
-	   recursiveCopy(thisPath, newPath, dirEntry->d_name, dirEntry->d_type==DT_REG);
+	      if( strcmp(dirEntry->d_name, ".") != 0 &&
+		  strcmp(dirEntry->d_name, "..") != 0 )
+	      {
+		if(recursiveCopy(thisPath, newPath, dirEntry->d_name, dirEntry->d_type==DT_REG))
+		  fail=!globalArgs.force;
+	      }
 	}
+	closedir(thisDir);
       }
-      closedir(thisDir);
+      else
+      {
+	printf("Cannot read directory: %s\n",thisPath);
+	fail=!globalArgs.force;
+      }
     }
-    return 0;
   }
+  free(thisPath);
+  free(newPath);
+  return fail;
 }
 
 int cpSubdirs(char *src, char *dst)
@@ -166,7 +179,7 @@ int main(int argc, char *argv[])
   int opt = 0;
   
   //glogalArgs initialization
-  globalArgs.verbosity = 0;
+  globalArgs.verbose = 0;
   globalArgs.force = 0;
   globalArgs.directories = NULL;
   globalArgs.numOfDirs = 0;
@@ -177,7 +190,7 @@ int main(int argc, char *argv[])
     switch(opt)
     {
       case 'v':
-	globalArgs.verbosity = 1; //true
+	globalArgs.verbose = 1; //true
 	break;
       case 'f':
         globalArgs.force = 1; //true
