@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/stat.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -32,34 +33,63 @@ int stringArrayOfSizeContainsString(char **array, int size, char *string)
   return 0;
 }
 
+int copyFile(char *src, char *dst)
+{
+  FILE *srcFile,*dstFile;
+    char buffer;
+ 
+    srcFile = fopen(src,"r");
+    if(!srcFile)
+    {
+    printf("Cannot open source file ! Press key to exit.");
+    exit(0);
+    }
+ 
+    dstFile = fopen(dst,"w");
+    if(dstFile==NULL)
+    {
+    printf("Cannot copy file ! Press key to exit.");
+    fclose(srcFile);
+    exit(0);
+    }
+ 
+    while((buffer=getc(srcFile))!=EOF)
+    {
+      putc(buffer,dstFile);
+    }
+ 
+    printf("File copied succesfully!");
+    fclose(srcFile);
+    fclose(dstFile);
+}
+
 int recursiveCopy(char *from, char *where, char *what, int file)
 {
+  char * thisPath = malloc(snprintf(NULL, 0, "%s/%s", from, what) + 1);
+  sprintf(thisPath, "%s/%s", from, what);
+  char * newPath = malloc(snprintf(NULL, 0, "%s/%s", where, what) + 1);
+  sprintf(newPath, "%s/%s", where, what);
   if(file)
   {
-    //implement file copy
-    printf("file: %s/%s\n",from,what);
+    copyFile(thisPath,newPath);
   }
   else
   {
-    char * newDirPath = malloc(snprintf(NULL, 0, "%s/%s", where, what) + 1);
-    sprintf(newDirPath, "%s/%s", where, what);
-    if(mkdir(newDirPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
+    if(mkdir(newPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
     {
-      printf("Failed to copy directory: %s\n",newDirPath);
+      printf("Failed to copy directory: %s\n",newPath);
       return 1;
     }
     DIR *thisDir;
     struct dirent* dirEntry;
-    char * thisDirPath = malloc(snprintf(NULL, 0, "%s/%s", from, what) + 1);
-    sprintf(thisDirPath, "%s/%s", from, what);
-    if(thisDir = opendir(thisDirPath))
+    if(thisDir = opendir(thisPath))
     {
       while(dirEntry = readdir(thisDir))
       {
 	if( strcmp(dirEntry->d_name, ".") != 0 &&
 	    strcmp(dirEntry->d_name, "..") != 0 )
 	{
-	   recursiveCopy(thisDirPath, newDirPath, dirEntry->d_name, dirEntry->d_type==DT_REG);
+	   recursiveCopy(thisPath, newPath, dirEntry->d_name, dirEntry->d_type==DT_REG);
 	}
       }
       closedir(thisDir);
