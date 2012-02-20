@@ -7,21 +7,22 @@
 struct globalArgs_t
 {
   int verbosity;       // -v option
+  int force;           // -f option
   char **directories;  // directories parameters
   int numOfDirs;       // # of directories specified
 } globalArgs;
 
-static const char *optString = "vh";
+static const char *optString = "vfh";
 
-static const char *usage = "usage: file-task [-v] source_directory target_directory";
+static const char *usage = "usage: file-task [-vf] source_directory target_directory";
 
 void help()
 {
   puts("Copies all subdirectories from source directory to target one without overwriting");
   puts(usage);
   puts(" -v: verbose output");
+  puts(" -f: force application to continue even when non critical errors appear");
   puts(" -h: help");
-  exit(EXIT_FAILURE);
 }
 
 int stringArrayOfSizeContainsString(char **array, int size, char *string)
@@ -166,6 +167,7 @@ int main(int argc, char *argv[])
   
   //glogalArgs initialization
   globalArgs.verbosity = 0;
+  globalArgs.force = 0;
   globalArgs.directories = NULL;
   globalArgs.numOfDirs = 0;
 
@@ -177,11 +179,13 @@ int main(int argc, char *argv[])
       case 'v':
 	globalArgs.verbosity = 1; //true
 	break;
+      case 'f':
+        globalArgs.force = 1; //true
+        break;
       case 'h':
 	help();
-        break;
       default:
-	abort();
+	return 1;
     }
     opt = getopt(argc, argv, optString);
   }
@@ -192,7 +196,7 @@ int main(int argc, char *argv[])
   if(globalArgs.numOfDirs<2)
   {
     puts(usage);
-    exit(EXIT_FAILURE);
+    return 1;
   }
   
 
