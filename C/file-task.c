@@ -6,16 +6,18 @@
 
 struct globalArgs_t
 {
-  int verbose;       // -v option
+  int verbose;         // -v option
   int force;           // -f option
   char **directories;  // directories parameters
   int numOfDirs;       // # of directories specified
 } globalArgs;
 
+//flag options
 static const char *optString = "vfh";
 
 static const char *usage = "usage: file-task [-vf] source_directory target_directory";
 
+//help message
 void help()
 {
   puts("Copies all subdirectories from source directory to target one without overwriting");
@@ -25,6 +27,9 @@ void help()
   puts(" -h: help");
 }
 
+/*
+ * Checks if string is in array of strings
+ */
 int stringArrayOfSizeContainsString(char **array, int size, char *string)
 {
   int i;
@@ -34,6 +39,9 @@ int stringArrayOfSizeContainsString(char **array, int size, char *string)
   return 0;
 }
 
+/*
+ * Copies file specified in src path to dst path.
+ */
 int copyFile(char *src, char *dst)
 {
   FILE *srcFile,*dstFile;
@@ -46,10 +54,12 @@ int copyFile(char *src, char *dst)
 	if(dstFile)
 	{
 	  if(globalArgs.verbose) printf("%s -> %s\n",src,dst);
+
 	  while((buffer=getc(srcFile))!=EOF)
 	  {
 	    putc(buffer,dstFile);
 	  }
+
 	  fclose(srcFile);
 	  fclose(dstFile);
 	  return 0;
@@ -67,23 +77,35 @@ int copyFile(char *src, char *dst)
     return 1;
 }
 
+/*
+ * Copies file/directory specified with from+what path to where+what path
+ * including it's contents (in case of dir)
+ */
 int recursiveCopy(char *from, char *where, char *what, int file)
 {
+  //spacifies if somefing in the function's lifecycle failed
   int fail = 0;
+  //full path to sourse of copy
   char * thisPath = malloc(snprintf(NULL, 0, "%s/%s", from, what) + 1);
   sprintf(thisPath, "%s/%s", from, what);
+  //full path to the destination of copy
   char * newPath = malloc(snprintf(NULL, 0, "%s/%s", where, what) + 1);
   sprintf(newPath, "%s/%s", where, what);
+
+  //handle file
   if(file)
   {
     fail = copyFile(thisPath,newPath);
   }
+  //handle directory
   else
   {
+    //make the same directory in the destination place
     if(fail=mkdir(newPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
     {
       printf("Cannot copy directory: %s\n",thisPath);
     }
+    //open source directory and process it's contents
     else
     {
       if (globalArgs.verbose) printf("%s/ -> %s/\n",thisPath, newPath);
@@ -91,6 +113,8 @@ int recursiveCopy(char *from, char *where, char *what, int file)
       struct dirent* dirEntry;
       if(thisDir = opendir(thisPath))
       {
+	//continue copying while there is still stuff to copy AND
+	//there were no fails OR force mode is ON
 	while((globalArgs.force||!fail)&&(dirEntry = readdir(thisDir)))
 	{
 	  if( strcmp(dirEntry->d_name, ".") != 0 &&
@@ -115,16 +139,24 @@ int recursiveCopy(char *from, char *where, char *what, int file)
   return fail;
 }
 
+/*
+ * Copies subdirectories of source directory to destination directory
+ * if directories with the same names are not present there allready
+ */
 int cpSubdirs(char *src, char *dst)
 {
+  //spacifies if somefing in the function's lifecycle failed
   int fail = 0;
   DIR *srcDir;
   DIR *dstDir;
   struct dirent *dirEntry;
+  //array of dir names present in destination directory
   char **destDirSubdirs;
-  int destDirSubdirsThreshold = 10;
+  //amount of subdirectories in destination directory
   int amountOFSubdirsInDstDir = 0;
-  
+  //amount of space allocated for subdir names array
+  int destDirSubdirsThreshold = 10;
+
   if(dstDir = opendir(dst))
   {
     destDirSubdirs = malloc(destDirSubdirsThreshold*sizeof(char *));
@@ -134,10 +166,11 @@ int cpSubdirs(char *src, char *dst)
 	  strcmp(dirEntry->d_name, ".") != 0 &&
 	  strcmp(dirEntry->d_name, "..") != 0 )
       {
+	//if the array if filled up, realoc more memory
 	if(amountOFSubdirsInDstDir==destDirSubdirsThreshold)
 	{
 	  destDirSubdirsThreshold*=2;
-	  destDirSubdirs = realloc(destDirSubdirs,destDirSubdirsThreshold);
+	  destDirSubdirs = realloc(destDirSubdirs,destDirSubdirsThreshold*sizeof(char *));
 	}
 	destDirSubdirs[amountOFSubdirsInDstDir]=dirEntry->d_name;
 	amountOFSubdirsInDstDir++;
@@ -145,6 +178,8 @@ int cpSubdirs(char *src, char *dst)
     }
     if(srcDir = opendir(src))
     {
+      //continue copying while there is still stuff to copy AND
+      //there were no fails OR force mode is ON
       while((globalArgs.force||!fail)&&(dirEntry = readdir(srcDir)))
       {
 	if( dirEntry->d_type == DT_DIR &&
