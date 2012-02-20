@@ -39,28 +39,31 @@ int copyFile(char *src, char *dst)
     char buffer;
  
     srcFile = fopen(src,"r");
-    if(!srcFile)
+    if(srcFile)
     {
-    printf("Cannot open source file ! Press key to exit.");
-    exit(0);
+        dstFile = fopen(dst,"w");
+	if(dstFile)
+	{
+	  if(globalArgs.verbosity) printf("%s -> %s\n",src,dst);
+	  while((buffer=getc(srcFile))!=EOF)
+	  {
+	    putc(buffer,dstFile);
+	  }
+	  fclose(srcFile);
+	  fclose(dstFile);
+	  return 0;
+	}
+	else
+	{
+	  printf("Cannot write file: %s\n",dst);
+	  fclose(srcFile);
+	}	
     }
- 
-    dstFile = fopen(dst,"w");
-    if(dstFile==NULL)
+    else
     {
-    printf("Cannot copy file ! Press key to exit.");
-    fclose(srcFile);
-    exit(0);
+      printf("Cannot read file: %s\n",src); 
     }
- 
-    while((buffer=getc(srcFile))!=EOF)
-    {
-      putc(buffer,dstFile);
-    }
- 
-    printf("File copied succesfully!");
-    fclose(srcFile);
-    fclose(dstFile);
+    return 1;
 }
 
 int recursiveCopy(char *from, char *where, char *what, int file)
