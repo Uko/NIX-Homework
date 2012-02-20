@@ -76,14 +76,13 @@ int recursiveCopy(char *from, char *where, char *what, int file)
   sprintf(newPath, "%s/%s", where, what);
   if(file)
   {
-      fail = copyFile(thisPath,newPath)&&!globalArgs.force;
+    fail = copyFile(thisPath,newPath);
   }
   else
   {
     if(fail=mkdir(newPath,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
     {
       printf("Cannot copy directory: %s\n",thisPath);
-      fail=!globalArgs.force;
     }
     else
     {
@@ -92,14 +91,15 @@ int recursiveCopy(char *from, char *where, char *what, int file)
       struct dirent* dirEntry;
       if(thisDir = opendir(thisPath))
       {
-	while(!fail&&(dirEntry = readdir(thisDir)))
+	while((globalArgs.force||!fail)&&(dirEntry = readdir(thisDir)))
 	{
-	      if( strcmp(dirEntry->d_name, ".") != 0 &&
-		  strcmp(dirEntry->d_name, "..") != 0 )
-	      {
-		if(recursiveCopy(thisPath, newPath, dirEntry->d_name, dirEntry->d_type==DT_REG))
-		  fail=!globalArgs.force;
-	      }
+	  if( strcmp(dirEntry->d_name, ".") != 0 &&
+	      strcmp(dirEntry->d_name, "..") != 0 &&
+	      (dirEntry->d_type == DT_REG ||
+	       dirEntry->d_type == DT_DIR))
+	  {
+	    fail=recursiveCopy(thisPath, newPath, dirEntry->d_name, dirEntry->d_type==DT_REG);
+	  }
 	}
 	closedir(thisDir);
       }
