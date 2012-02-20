@@ -1,4 +1,4 @@
-#! /bin/csh
+#!/bin/csh
 
 set help="usage: $0 [-v] source_directory target_directory"
 
