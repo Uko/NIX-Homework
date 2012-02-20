@@ -117,18 +117,17 @@ int recursiveCopy(char *from, char *where, char *what, int file)
 
 int cpSubdirs(char *src, char *dst)
 {
+  int fail = 0;
   DIR *srcDir;
   DIR *dstDir;
-  struct dirent* dirEntry;
+  struct dirent *dirEntry;
   char **destDirSubdirs;
   int destDirSubdirsThreshold = 10;
-  destDirSubdirs = malloc(destDirSubdirsThreshold*sizeof(char *));
   int amountOFSubdirsInDstDir = 0;
-  
-
   
   if(dstDir = opendir(dst))
   {
+    destDirSubdirs = malloc(destDirSubdirsThreshold*sizeof(char *));
     while(dirEntry = readdir(dstDir))
     {
       if( dirEntry->d_type == DT_DIR &&
@@ -146,7 +145,7 @@ int cpSubdirs(char *src, char *dst)
     }
     if(srcDir = opendir(src))
     {
-      while(dirEntry = readdir(srcDir))
+      while((globalArgs.force||!fail)&&(dirEntry = readdir(srcDir)))
       {
 	if( dirEntry->d_type == DT_DIR &&
 	    strcmp(dirEntry->d_name, ".") != 0 &&
@@ -155,23 +154,26 @@ int cpSubdirs(char *src, char *dst)
 					     amountOFSubdirsInDstDir,
 					     dirEntry->d_name))
 	{
-	  recursiveCopy(src,dst,dirEntry->d_name,0);
+	  fail=recursiveCopy(src,dst,dirEntry->d_name,0);
 	}
       }
+      closedir(srcDir);
     }
     else
     {
-      printf("Cannot open directory: '%s'\n", src);
-      return 1;
+      printf("Cannot open source directory: '%s'\n", src);
+      fail = 1;
     }
+    free(destDirSubdirs);
+    closedir(dstDir);
   }
   else
   {
-    printf("Cannot open directory: '%s'\n", dst);
-    return 1;
+    printf("Cannot open target directory: '%s'\n", dst);
+    fail = 1;
   } 
 
-  return 0;
+  return fail;
 }
 
 int main(int argc, char *argv[])
@@ -211,8 +213,6 @@ int main(int argc, char *argv[])
     puts(usage);
     return 1;
   }
-  
-
-  cpSubdirs(globalArgs.directories[0],globalArgs.directories[1]);
-  return 0;
+ 
+  return cpSubdirs(globalArgs.directories[0],globalArgs.directories[1]);;
 }
