@@ -249,5 +249,5 @@ int main(int argc, char *argv[])
     return 1;
   }
  
-  return cpSubdirs(globalArgs.directories[0],globalArgs.directories[1]);;
+  return cpSubdirs(globalArgs.directories[0],globalArgs.directories[1]);
 }
