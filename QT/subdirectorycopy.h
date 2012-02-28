@@ -24,7 +24,7 @@ private slots:
 private:
     Ui::SubdirectoryCopy *ui;
     void fireMessage(const QString &message);
-    void copyDirectory(const QString src, const QString dst, const int from, const float upperStep);
+    void copyDirectory(const QString src, const QString dst, const float upperStep);
 };
 
 #endif // SUBDIRECTORYCOPY_H

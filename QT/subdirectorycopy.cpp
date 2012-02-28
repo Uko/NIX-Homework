@@ -32,9 +32,31 @@ void SubdirectoryCopy::dstButtonClicked()
     if (!path.isNull() && !path.isEmpty()) ui->targetField->setText(path);
 }
 
-void SubdirectoryCopy::copyDirectory(const QString src, const QString dst, const int from, const float range)
+void SubdirectoryCopy::copyDirectory(const QString src, const QString dst, const float range)
 {
     QDir().mkdir(dst);
+    QDir srcDir = QDir(src);
+    float step = range/srcDir.count();
+    QStringList contents = srcDir.entryList(QDir::AllDirs|QDir::NoDotAndDotDot|QDir::Readable);
+    for(int i=0; i<contents.count(); i++)
+    {
+        int endStepProgressBarValue = ui->progressBar->value()+step;
+
+        copyDirectory(srcDir.absoluteFilePath(contents[i]),
+                      QDir(dst).absoluteFilePath(contents[i]),
+                      step);
+
+        ui->progressBar->setValue(endStepProgressBarValue);
+    }
+
+    contents = srcDir.entryList(QDir::Files|QDir::Readable);
+    for(int i=0; i<contents.count(); i++)
+    {
+        ui->progressBar->setValue(ui->progressBar->value()+step);
+        QFile(srcDir.absoluteFilePath(contents[i])).copy(QDir(dst).absoluteFilePath(contents[i]));
+    }
+
+
 }
 
 void SubdirectoryCopy::makeCopy()
@@ -58,14 +80,14 @@ void SubdirectoryCopy::makeCopy()
                     ui->comment->setText("");
                     for(int i=0; i<contents.count(); i++)
                     {
-                        ui->progressBar->setValue(ui->progressBar->value()+step);
-                        if(dstSubdirs.contains(contents[i]))
+                        int endStepProgressBarValue = ui->progressBar->value()+step;
+                        if(!dstSubdirs.contains(contents[i]))
                         {
                             copyDirectory(srcDir->absoluteFilePath(contents[i]),
                                           dstDir->absoluteFilePath(contents[i]),
-                                          ui->progressBar->value(),
                                           step);
                         }
+                        ui->progressBar->setValue(endStepProgressBarValue);
                     }
                     ui->progressBar->setValue(ui->progressBar->maximum());
                     ui->comment->setText("Done !");

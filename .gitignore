@@ -4,4 +4,5 @@
 scratch
 file-task
 QT*__Debug
+QT*__Release
 *.pro.user
