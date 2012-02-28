@@ -2,6 +2,7 @@
 #define SUBDIRECTORYCOPY_H
 
 #include <QDialog>
+#include "qerrormessage.h"
 
 namespace Ui {
 class SubdirectoryCopy;
@@ -18,9 +19,13 @@ public:
 private slots:
     void srcButtonClicked();
     void dstButtonClicked();
+    void makeCopy();
     
 private:
     Ui::SubdirectoryCopy *ui;
+    QErrorMessage *errMsg;
+    void fireMessage(const QString &message);
+    void copyDirectory(const QString src, const QString dst, const int from, const float upperStep);
 };
 
 #endif // SUBDIRECTORYCOPY_H
