@@ -1,25 +1,23 @@
 #include "subdirectorycopy.h"
 #include "ui_subdirectorycopy.h"
 #include "qfiledialog.h"
+#include "qmessagebox.h"
 
 SubdirectoryCopy::SubdirectoryCopy(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::SubdirectoryCopy)
 {
     ui->setupUi(this);
-    errMsg = new QErrorMessage(this);
 }
 
 SubdirectoryCopy::~SubdirectoryCopy()
 {
     delete ui;
-    delete errMsg;
 }
 
 void SubdirectoryCopy::fireMessage(const QString &message)
 {
-    errMsg->showMessage(message);
-    errMsg->exec();
+    QMessageBox::warning(this, "Warning!", message);
 }
 
 void SubdirectoryCopy::srcButtonClicked()
@@ -36,7 +34,7 @@ void SubdirectoryCopy::dstButtonClicked()
 
 void SubdirectoryCopy::copyDirectory(const QString src, const QString dst, const int from, const float range)
 {
-    //do all the stuff
+    QDir().mkdir(dst);
 }
 
 void SubdirectoryCopy::makeCopy()

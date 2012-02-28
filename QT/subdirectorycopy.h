@@ -23,7 +23,6 @@ private slots:
     
 private:
     Ui::SubdirectoryCopy *ui;
-    QErrorMessage *errMsg;
     void fireMessage(const QString &message);
     void copyDirectory(const QString src, const QString dst, const int from, const float upperStep);
 };
