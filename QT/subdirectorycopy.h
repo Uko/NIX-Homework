@@ -14,6 +14,10 @@ class SubdirectoryCopy : public QWidget
 public:
     explicit SubdirectoryCopy(QWidget *parent = 0);
     ~SubdirectoryCopy();
+
+private slots:
+    void srcButtonClicked();
+    void dstButtonClicked();
     
 private:
     Ui::SubdirectoryCopy *ui;
