@@ -8,6 +8,7 @@ SubdirectoryCopy::SubdirectoryCopy(QWidget *parent) :
     ui(new Ui::SubdirectoryCopy)
 {
     ui->setupUi(this);
+    setWindowFlags( (windowFlags() | Qt::CustomizeWindowHint) & ~Qt::WindowMaximizeButtonHint);
 }
 
 SubdirectoryCopy::~SubdirectoryCopy()
@@ -32,29 +33,19 @@ void SubdirectoryCopy::dstButtonClicked()
     if (!path.isNull() && !path.isEmpty()) ui->targetField->setText(path);
 }
 
-void SubdirectoryCopy::copyDirectory(const QString src, const QString dst, const float range)
+void SubdirectoryCopy::copyDirectory(const QString src, const QString dst)
 {
     QDir().mkdir(dst);
+
     QDir srcDir = QDir(src);
-    float step = range/srcDir.count();
     QStringList contents = srcDir.entryList(QDir::AllDirs|QDir::NoDotAndDotDot|QDir::Readable);
     for(int i=0; i<contents.count(); i++)
-    {
-        int endStepProgressBarValue = ui->progressBar->value()+step;
-
         copyDirectory(srcDir.absoluteFilePath(contents[i]),
-                      QDir(dst).absoluteFilePath(contents[i]),
-                      step);
-
-        ui->progressBar->setValue(endStepProgressBarValue);
-    }
+                      QDir(dst).absoluteFilePath(contents[i]));
 
     contents = srcDir.entryList(QDir::Files|QDir::Readable);
     for(int i=0; i<contents.count(); i++)
-    {
-        ui->progressBar->setValue(ui->progressBar->value()+step);
         QFile(srcDir.absoluteFilePath(contents[i])).copy(QDir(dst).absoluteFilePath(contents[i]));
-    }
 
 
 }
@@ -75,21 +66,11 @@ void SubdirectoryCopy::makeCopy()
                 QStringList contents = srcDir->entryList(QDir::AllDirs|QDir::NoDotAndDotDot|QDir::Readable);
                 if(contents.count()>0)
                 {
-                    float step = (ui->progressBar->maximum()-ui->progressBar->minimum())/contents.count();
-                    ui->progressBar->setValue(ui->progressBar->minimum());
                     ui->comment->setText("");
                     for(int i=0; i<contents.count(); i++)
-                    {
-                        int endStepProgressBarValue = ui->progressBar->value()+step;
                         if(!dstSubdirs.contains(contents[i]))
-                        {
                             copyDirectory(srcDir->absoluteFilePath(contents[i]),
-                                          dstDir->absoluteFilePath(contents[i]),
-                                          step);
-                        }
-                        ui->progressBar->setValue(endStepProgressBarValue);
-                    }
-                    ui->progressBar->setValue(ui->progressBar->maximum());
+                                          dstDir->absoluteFilePath(contents[i]));
                     ui->comment->setText("Done !");
                 }
             }

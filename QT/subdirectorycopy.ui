@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>180</height>
+    <height>150</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -22,13 +22,13 @@
   <property name="minimumSize">
    <size>
     <width>300</width>
-    <height>180</height>
+    <height>150</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>300</width>
-    <height>180</height>
+    <height>150</height>
    </size>
   </property>
   <property name="focusPolicy">
@@ -128,7 +128,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>140</y>
+     <y>113</y>
      <width>114</width>
      <height>32</height>
     </rect>
@@ -143,31 +143,6 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QProgressBar" name="progressBar">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>114</y>
-     <width>281</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="maximum">
-    <number>10000</number>
-   </property>
-   <property name="value">
-    <number>0</number>
-   </property>
-   <property name="textVisible">
-    <bool>true</bool>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
   <widget class="QLabel" name="comment">
    <property name="enabled">
     <bool>true</bool>
@@ -175,7 +150,7 @@
    <property name="geometry">
     <rect>
      <x>15</x>
-     <y>147</y>
+     <y>120</y>
      <width>161</width>
      <height>16</height>
     </rect>
