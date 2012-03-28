@@ -29,7 +29,6 @@ public class FileTask
 			@Override
 			public FileVisitResult preVisitDirectory (Path dir, BasicFileAttributes attrs) throws IOException
 			{
-				System.out.println(dir.toString());
 				Path targetdir = target.resolve(source.relativize(dir));
 				if(!Files.exists(targetdir))
 				{
