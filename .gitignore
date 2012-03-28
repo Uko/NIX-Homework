@@ -6,3 +6,6 @@ file-task
 QT*__Debug
 QT*__Release
 *.pro.user
+Java/nbproject/private
+Java/dist
+Java/build
